@@ -222,11 +222,11 @@ async function shutdown(signal: string) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-const PORT = process.env.PORT || 4000; // server v2
+const PORT = parseInt(process.env.PORT || "4000", 10);
 
 // Hydrate from Redis, then start the server
 store.hydrate().then(() => {
-  httpServer.listen(PORT, () => {
-    console.log(`Game server running on http://localhost:${PORT}`);
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`Game server running on 0.0.0.0:${PORT}`);
   });
 });
