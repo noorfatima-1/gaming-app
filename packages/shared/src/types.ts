@@ -1,6 +1,7 @@
 // Player
 export interface Player {
   id: string;
+  userId?: string; // Supabase auth user ID
   username: string;
   avatar: string;
   score: number;
@@ -34,13 +35,16 @@ export interface Stroke {
 
 // Socket Events - Client sends to Server
 export interface ClientEvents {
-  "room:create": (username: string) => void;
-  "room:join": (roomId: string, username: string) => void;
+  "room:create": (username: string, userId?: string) => void;
+  "room:join": (roomId: string, username: string, userId?: string) => void;
   "room:leave": () => void;
   "game:start": () => void;
   "game:word-choice": (word: string) => void;
   "game:draw": (stroke: Stroke) => void;
   "game:guess": (guess: string) => void;
+  "game:undo": () => void;
+  "game:clear-canvas": () => void;
+  "chat:message": (message: string) => void;
 }
 
 // Socket Events - Server sends to Client
@@ -53,9 +57,14 @@ export interface ServerEvents {
   "game:word-options": (words: string[]) => void;
   "game:turn-start": (drawerId: string, wordLength: number) => void;
   "game:draw": (stroke: Stroke) => void;
+  "game:undo": () => void;
+  "game:clear-canvas": () => void;
   "game:guess-result": (playerId: string, correct: boolean) => void;
   "game:hint": (hint: string) => void;
+  "game:scores": (scores: Record<string, number>) => void;
   "game:turn-end": (word: string, scores: Record<string, number>) => void;
   "game:over": (scores: Record<string, number>) => void;
-  "error": (message: string) => void;
+  "chat:message": (playerId: string, username: string, message: string) => void;
+  "game:timer": (timeLeft: number) => void;
+  error: (message: string) => void;
 }

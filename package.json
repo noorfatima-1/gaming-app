@@ -11,6 +11,10 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:server": "npm run dev --workspace=apps/server",
     "dev": "npm run dev:web & npm run dev:server",
-    "build": "npm run build --workspace=apps/web"
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build:server": "npm run build:shared && npm run build --workspace=apps/server",
+    "build:web": "npm run build:shared && npm run build --workspace=apps/web",
+    "build": "npm run build:shared && npm run build --workspace=apps/server && npm run build --workspace=apps/web",
+    "start:server": "node apps/server/dist/index.js"
   }
 }
