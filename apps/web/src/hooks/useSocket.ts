@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import type { ClientEvents, ServerEvents } from "shared";
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:4000";
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "https://gaming-app-production-11e4.up.railway.app";
 
 type GameSocket = Socket<ServerEvents, ClientEvents>;
 
