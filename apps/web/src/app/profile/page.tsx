@@ -5,7 +5,7 @@ import { createClient } from "../../lib/supabase-browser";
 import { api } from "../../lib/api";
 import ProfileCard from "../../components/ProfileCard";
 import GameHistoryList from "../../components/GameHistoryList";
-import type { UserProfile, GameHistoryEntry, UserAchievement, Achievement } from "shared";
+import type { UserProfile, GameHistoryEntry, UserAchievement, Achievement, LeaderboardEntry } from "shared";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -38,13 +38,13 @@ export default function ProfilePage() {
       setProfile(profileData as UserProfile);
       setEditName((profileData as UserProfile).display_name);
       setEditBio((profileData as UserProfile).bio || "");
-      setHistory(((historyData as Record<string, unknown>).data || []) as GameHistoryEntry[]);
+      setHistory(((historyData as { data: GameHistoryEntry[] }).data) || []);
       setAchievements(allAchievements as Achievement[]);
       setUserAchievements(unlockedAchievements as UserAchievement[]);
 
       // Load stats from leaderboard
       const leaderboard = await api.getLeaderboard().catch(() => []);
-      const myStats = (leaderboard as Record<string, unknown>[]).find((e) => e.user_id === user.id);
+      const myStats = (leaderboard as LeaderboardEntry[]).find((e) => e.user_id === user.id);
       if (myStats) {
         setStats({
           games_played: myStats.games_played,

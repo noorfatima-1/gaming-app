@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { api } from "../../../lib/api";
 import ProfileCard from "../../../components/ProfileCard";
 import GameHistoryList from "../../../components/GameHistoryList";
-import type { UserProfile, GameHistoryEntry } from "shared";
+import type { UserProfile, GameHistoryEntry, LeaderboardEntry } from "shared";
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -29,9 +29,9 @@ export default function UserProfilePage() {
       ]);
 
       setProfile(profileData as UserProfile);
-      setHistory(((historyData as Record<string, unknown>).data || []) as GameHistoryEntry[]);
+      setHistory(((historyData as { data: GameHistoryEntry[] }).data) || []);
 
-      const myStats = (leaderboard as Record<string, unknown>[]).find((e) => e.user_id === userId);
+      const myStats = (leaderboard as LeaderboardEntry[]).find((e) => e.user_id === userId);
       if (myStats) {
         setStats({
           games_played: myStats.games_played,
