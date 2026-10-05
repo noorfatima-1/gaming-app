@@ -22,8 +22,9 @@ export default function SettingsPage() {
       if (user) {
         setDisplayName(user.user_metadata?.display_name || user.email?.split("@")[0] || "");
         // Load avatar from profile
-        api.getProfile(user.id).then((profile: Record<string, unknown>) => {
-          if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+        api.getProfile(user.id).then((profile) => {
+          const p = profile as Record<string, unknown>;
+          if (p?.avatar_url) setAvatarUrl(p.avatar_url as string);
         }).catch(() => {});
       }
     });
