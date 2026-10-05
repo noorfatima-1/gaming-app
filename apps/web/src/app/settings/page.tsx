@@ -22,7 +22,7 @@ export default function SettingsPage() {
       if (user) {
         setDisplayName(user.user_metadata?.display_name || user.email?.split("@")[0] || "");
         // Load avatar from profile
-        api.getProfile(user.id).then((profile: any) => {
+        api.getProfile(user.id).then((profile: Record<string, unknown>) => {
           if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
         }).catch(() => {});
       }

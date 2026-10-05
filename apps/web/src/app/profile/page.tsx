@@ -9,7 +9,7 @@ import type { UserProfile, GameHistoryEntry, UserAchievement, Achievement } from
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
@@ -38,13 +38,13 @@ export default function ProfilePage() {
       setProfile(profileData as UserProfile);
       setEditName((profileData as UserProfile).display_name);
       setEditBio((profileData as UserProfile).bio || "");
-      setHistory((historyData as any).data || []);
+      setHistory(((historyData as Record<string, unknown>).data || []) as GameHistoryEntry[]);
       setAchievements(allAchievements as Achievement[]);
       setUserAchievements(unlockedAchievements as UserAchievement[]);
 
       // Load stats from leaderboard
       const leaderboard = await api.getLeaderboard().catch(() => []);
-      const myStats = (leaderboard as any[]).find((e: any) => e.user_id === user.id);
+      const myStats = (leaderboard as Record<string, unknown>[]).find((e) => e.user_id === user.id);
       if (myStats) {
         setStats({
           games_played: myStats.games_played,

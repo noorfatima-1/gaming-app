@@ -14,8 +14,8 @@ interface Stats {
 
 export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [users, setUsers] = useState<any[]>([]);
-  const [games, setGames] = useState<any[]>([]);
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [games, setGames] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -35,7 +35,7 @@ export default function AdminPage() {
         return;
       }
 
-      const profile = await api.getProfile(user.id) as any;
+      const profile = await api.getProfile(user.id) as Record<string, unknown>;
       if (!profile?.is_admin) {
         setError("Access denied. Admin privileges required.");
         setLoading(false);
@@ -50,8 +50,8 @@ export default function AdminPage() {
         api.getAdminGames(),
       ]);
       setStats(statsData as Stats);
-      setUsers((usersData as any).data || []);
-      setGames((gamesData as any).data || []);
+      setUsers(((usersData as Record<string, unknown>).data || []) as Record<string, unknown>[]);
+      setGames(((gamesData as Record<string, unknown>).data || []) as Record<string, unknown>[]);
     } catch {
       setError("Access denied or failed to load data");
     } finally {
@@ -119,12 +119,12 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.slice(0, 10).map((u: any) => (
-                  <tr key={u.id} className="border-b border-white/5">
-                    <td className="py-2">{u.display_name || u.username}</td>
-                    <td className="py-2">{u.level}</td>
-                    <td className="py-2">{u.xp}</td>
-                    <td className="py-2 text-white/40">{new Date(u.created_at).toLocaleDateString()}</td>
+                {users.slice(0, 10).map((u) => (
+                  <tr key={u.id as string} className="border-b border-white/5">
+                    <td className="py-2">{(u.display_name || u.username) as string}</td>
+                    <td className="py-2">{u.level as number}</td>
+                    <td className="py-2">{u.xp as number}</td>
+                    <td className="py-2 text-white/40">{new Date(u.created_at as string).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -146,12 +146,12 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {games.slice(0, 10).map((g: any) => (
-                  <tr key={g.id} className="border-b border-white/5">
+                {games.slice(0, 10).map((g) => (
+                  <tr key={g.id as string} className="border-b border-white/5">
                     <td className="py-2">{g.game_type === "crazy-eights" ? "Crazy Eights" : "Draw & Guess"}</td>
-                    <td className="py-2">{g.player_count}</td>
-                    <td className="py-2">{g.rounds}</td>
-                    <td className="py-2 text-white/40">{new Date(g.created_at).toLocaleDateString()}</td>
+                    <td className="py-2">{g.player_count as number}</td>
+                    <td className="py-2">{g.rounds as number}</td>
+                    <td className="py-2 text-white/40">{new Date(g.created_at as string).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

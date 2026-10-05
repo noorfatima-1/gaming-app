@@ -11,7 +11,7 @@ export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +29,9 @@ export default function UserProfilePage() {
       ]);
 
       setProfile(profileData as UserProfile);
-      setHistory((historyData as any).data || []);
+      setHistory(((historyData as Record<string, unknown>).data || []) as GameHistoryEntry[]);
 
-      const myStats = (leaderboard as any[]).find((e: any) => e.user_id === userId);
+      const myStats = (leaderboard as Record<string, unknown>[]).find((e) => e.user_id === userId);
       if (myStats) {
         setStats({
           games_played: myStats.games_played,

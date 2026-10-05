@@ -24,11 +24,11 @@ export function useCardGameEvents() {
       setMyHand(cards);
     };
 
-    const handlePlayed = (_playerId: string, _card: Card, _newSuit: Suit) => {
+    const handlePlayed = () => {
       // Visual feedback handled by state update
     };
 
-    const handleDrew = (_playerId: string, _newHandSize: number) => {
+    const handleDrew = () => {
       // Visual feedback handled by state update
     };
 

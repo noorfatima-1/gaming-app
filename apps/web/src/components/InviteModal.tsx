@@ -2,7 +2,7 @@
 
 import { useSocket } from "../hooks/useSocket";
 import { useSocialStore } from "../store/socialStore";
-import type { Friendship, GameType } from "shared";
+import type { GameType } from "shared";
 
 interface Props {
   roomId: string;

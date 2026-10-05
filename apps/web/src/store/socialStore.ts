@@ -18,7 +18,7 @@ interface SocialState {
   unreadCount: number;
 }
 
-export const useSocialStore = create<SocialState>((set, get) => ({
+export const useSocialStore = create<SocialState>((set) => ({
   friends: [],
   setFriends: (friends) => set({ friends }),
 
