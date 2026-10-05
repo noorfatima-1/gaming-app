@@ -31,7 +31,7 @@ export default function AddFriendModal({ onClose, onSent }: Props) {
   async function handleSend(userId: string) {
     try {
       await api.sendFriendRequest(userId);
-      setSentIds((prev) => new Set([...prev, userId]));
+      setSentIds((prev) => new Set(Array.from(prev).concat(userId)));
       onSent();
     } catch (err) {
       console.error("Failed to send request:", err);
