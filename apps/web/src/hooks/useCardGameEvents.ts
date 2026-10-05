@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useSocket } from "./useSocket";
 import { useCardGameStore } from "../store/cardGameStore";
 import { useGameStore } from "../store/gameStore";
-import type { Card, Suit, CrazyEightsState } from "shared";
+import type { Card, CrazyEightsState } from "shared";
 
 export function useCardGameEvents() {
   const socket = useSocket();
