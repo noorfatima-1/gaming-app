@@ -11,7 +11,7 @@ export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
+  const [stats, setStats] = useState<{ games_played: number; wins: number; total_score: number; best_score: number; avg_score: number } | undefined>(undefined);
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 

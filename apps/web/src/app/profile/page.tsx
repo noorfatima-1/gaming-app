@@ -9,7 +9,7 @@ import type { UserProfile, GameHistoryEntry, UserAchievement, Achievement } from
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
+  const [stats, setStats] = useState<{ games_played: number; wins: number; total_score: number; best_score: number; avg_score: number } | undefined>(undefined);
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
