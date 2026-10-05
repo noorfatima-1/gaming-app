@@ -8,6 +8,7 @@ import { useGameStore } from "../store/gameStore";
 import { createClient } from "../lib/supabase-browser";
 import AnimatedBackground from "./AnimatedBackground";
 import RobotAvatar from "./RobotAvatar";
+import type { GameType } from "shared";
 
 export default function HomeScreen() {
   const socket = useSocket();
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const { username, setUsername, userId } = useGameStore();
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState("");
+  const [selectedGame, setSelectedGame] = useState<GameType>("draw-and-guess");
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -25,7 +27,7 @@ export default function HomeScreen() {
   const handleCreate = () => {
     if (!username.trim()) { setError("Enter your name first!"); return; }
     setError("");
-    socket.emit("room:create", username.trim(), userId || undefined);
+    socket.emit("room:create", username.trim(), selectedGame, userId || undefined);
   };
 
   const handleJoin = () => {
@@ -70,11 +72,9 @@ export default function HomeScreen() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <span className="text-yellow-400 text-lg">&#9998;</span>
             <p className="text-purple-300 text-sm font-medium">
-              Draw, Guess & Dominate!
+              Multiplayer Gaming Platform
             </p>
-            <span className="text-yellow-400 text-lg">&#9998;</span>
           </motion.div>
         </motion.div>
 
@@ -119,6 +119,39 @@ export default function HomeScreen() {
                 maxLength={20}
                 className="w-full px-4 py-3 bg-white/10 border-2 border-purple-500/30 rounded-xl focus:border-purple-400 focus:outline-none text-base text-white placeholder-gray-500 transition-colors"
               />
+            </div>
+
+            {/* Game Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-purple-300 mb-2">
+                Choose Game
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setSelectedGame("draw-and-guess")}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    selectedGame === "draw-and-guess"
+                      ? "border-purple-500 bg-purple-500/20"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                >
+                  <div className="text-2xl mb-1">🎨</div>
+                  <div className="text-sm font-bold">Draw & Guess</div>
+                  <div className="text-[10px] text-white/40">3-8 players</div>
+                </button>
+                <button
+                  onClick={() => setSelectedGame("crazy-eights")}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    selectedGame === "crazy-eights"
+                      ? "border-blue-500 bg-blue-500/20"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                >
+                  <div className="text-2xl mb-1">🃏</div>
+                  <div className="text-sm font-bold">Crazy Eights</div>
+                  <div className="text-[10px] text-white/40">2-6 players</div>
+                </button>
+              </div>
             </div>
 
             {/* Create Room */}

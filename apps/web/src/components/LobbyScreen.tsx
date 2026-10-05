@@ -70,6 +70,12 @@ export default function LobbyScreen() {
             >
               Waiting Room
             </motion.h2>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="text-lg">{room.gameType === "crazy-eights" ? "🃏" : "🎨"}</span>
+              <span className="text-sm font-medium text-white/80">
+                {room.gameType === "crazy-eights" ? "Crazy Eights" : "Draw & Guess"}
+              </span>
+            </div>
             <p className="text-sm text-purple-300">
               Share the code with your friends!
             </p>
@@ -179,14 +185,19 @@ export default function LobbyScreen() {
           {isHost ? (
             <motion.button
               onClick={handleStart}
-              disabled={room.players.length < 3}
+              disabled={room.players.length < (room.gameType === "crazy-eights" ? 2 : 3)}
               className="btn-3d w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-xl text-lg shadow-lg shadow-green-500/25 disabled:shadow-none"
-              whileHover={room.players.length >= 3 ? { scale: 1.02 } : {}}
-              whileTap={room.players.length >= 3 ? { scale: 0.98 } : {}}
+              whileHover={room.players.length >= (room.gameType === "crazy-eights" ? 2 : 3) ? { scale: 1.02 } : {}}
+              whileTap={room.players.length >= (room.gameType === "crazy-eights" ? 2 : 3) ? { scale: 0.98 } : {}}
             >
-              {room.players.length < 3
-                ? `Need ${3 - room.players.length} more player${3 - room.players.length > 1 ? "s" : ""}`
-                : "Start Game!"}
+              {(() => {
+                const min = room.gameType === "crazy-eights" ? 2 : 3;
+                if (room.players.length < min) {
+                  const n = min - room.players.length;
+                  return `Need ${n} more player${n > 1 ? "s" : ""}`;
+                }
+                return "Start Game!";
+              })()}
             </motion.button>
           ) : (
             <div className="text-center py-3">

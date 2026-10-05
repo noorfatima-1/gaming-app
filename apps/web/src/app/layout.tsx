@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Navbar from "../components/Navbar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,13 +15,13 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "NoorGameZone - Draw & Guess",
+  title: "NoorGameZone - Multiplayer Gaming Platform",
   description:
-    "Play the ultimate multiplayer drawing and guessing game with friends! Create a room, invite friends, and see who can guess the fastest.",
-  keywords: ["drawing game", "multiplayer", "NoorGameZone", "draw and guess", "online game"],
+    "Play multiplayer games with friends! Draw & Guess, Crazy Eights, and more. Create a room, invite friends, and compete!",
+  keywords: ["drawing game", "card game", "multiplayer", "NoorGameZone", "crazy eights", "online game"],
   openGraph: {
-    title: "NoorGameZone - Draw & Guess",
-    description: "Draw, guess, and compete with friends in real-time!",
+    title: "NoorGameZone - Multiplayer Gaming Platform",
+    description: "Play multiplayer games with friends in real-time!",
     type: "website",
     siteName: "NoorGameZone",
   },
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
@@ -52,6 +54,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Navbar />
         {children}
       </body>
     </html>

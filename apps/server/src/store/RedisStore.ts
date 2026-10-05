@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { Player, Room, Stroke } from "shared";
+import { Player, Room, Stroke, GameType } from "shared";
 
 export interface RoomState extends Room {
   wordOptions: string[];
@@ -23,6 +23,7 @@ interface RoomData {
   host: string;
   players: Player[];
   status: "lobby" | "playing" | "finished";
+  gameType: GameType;
   currentDrawer: string | null;
   secretWord: string | null;
   round: number;
@@ -45,6 +46,7 @@ function roomStateToData(room: RoomState): RoomData {
     host: room.host,
     players: room.players,
     status: room.status,
+    gameType: room.gameType || "draw-and-guess",
     currentDrawer: room.currentDrawer,
     secretWord: room.secretWord,
     round: room.round,
@@ -195,7 +197,15 @@ class RedisBackedStore {
     }
   }
 
-  createRoom(roomId: string, hostId: string, username: string, userId?: string): RoomState {
+  getActiveRoomCount(): number {
+    let count = 0;
+    for (const room of this.rooms.values()) {
+      if (room.status !== "finished") count++;
+    }
+    return count;
+  }
+
+  createRoom(roomId: string, hostId: string, username: string, gameType: GameType = "draw-and-guess", userId?: string): RoomState {
     const host: Player = {
       id: hostId,
       userId,
@@ -209,6 +219,7 @@ class RedisBackedStore {
       host: hostId,
       players: [host],
       status: "lobby",
+      gameType,
       currentDrawer: null,
       secretWord: null,
       round: 0,

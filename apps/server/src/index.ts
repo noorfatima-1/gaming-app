@@ -8,9 +8,11 @@ import { Server } from "socket.io";
 import cors from "cors";
 import helmet from "helmet";
 import { v4 as uuidv4 } from "uuid";
-import { ClientEvents, ServerEvents } from "shared";
+import { ClientEvents, ServerEvents, GameType } from "shared";
+import apiRouter from "./routes";
+import { onlineTracker } from "./social/OnlineTracker";
 import { store } from "./store/RedisStore";
-import { GameManager } from "./game/GameManager";
+import { GameRouter } from "./game/GameRouter";
 import { initSentry, Sentry } from "./lib/sentry";
 import { rateLimiter, RATE_LIMITS } from "./lib/rateLimiter";
 import { sanitizeString, isValidUsername, isValidRoomCode, isValidGuess } from "./lib/validation";
@@ -40,13 +42,17 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", message: "Game server is running" });
 });
 
-const gameManager = new GameManager(io as any);
+// REST API routes
+app.use("/api", apiRouter);
+
+const gameManager = new GameRouter(io as any);
+onlineTracker.setIO(io as any);
 
 io.on("connection", (socket) => {
   console.log(`Player connected: ${socket.id}`);
 
   // Create a new room
-  socket.on("room:create", (username: string, userId?: string) => {
+  socket.on("room:create", (username: string, gameType: GameType = "draw-and-guess", userId?: string) => {
     if (!rateLimiter.check(`create:${socket.id}`, RATE_LIMITS.roomCreate.max, RATE_LIMITS.roomCreate.windowMs)) {
       socket.emit("error", "Too many requests. Slow down!");
       return;
@@ -58,8 +64,15 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // Validate game type
+    const validGameTypes: GameType[] = ["draw-and-guess", "crazy-eights"];
+    if (!validGameTypes.includes(gameType)) {
+      socket.emit("error", "Invalid game type");
+      return;
+    }
+
     const roomId = uuidv4().slice(0, 6).toUpperCase();
-    const room = store.createRoom(roomId, socket.id, cleanName, userId);
+    const room = store.createRoom(roomId, socket.id, cleanName, gameType, userId);
 
     socket.join(roomId);
     socket.emit("room:created", {
@@ -67,6 +80,7 @@ io.on("connection", (socket) => {
       host: room.host,
       players: room.players,
       status: room.status,
+      gameType: room.gameType,
       currentDrawer: room.currentDrawer,
       secretWord: null,
       round: room.round,
@@ -109,6 +123,7 @@ io.on("connection", (socket) => {
       host: room.host,
       players: room.players,
       status: room.status,
+      gameType: room.gameType,
       currentDrawer: room.currentDrawer,
       secretWord: null,
       round: room.round,
@@ -196,8 +211,81 @@ io.on("connection", (socket) => {
     gameManager.handleGuess(socket.id, cleanGuess);
   });
 
+  // Chat: in-game message
+  socket.on("chat:message", (message: string) => {
+    if (!rateLimiter.check(`chat:${socket.id}`, RATE_LIMITS.guess.max, RATE_LIMITS.guess.windowMs)) {
+      return;
+    }
+    const cleanMsg = sanitizeString(message, 200);
+    if (!cleanMsg) return;
+    const room = store.getRoomByPlayer(socket.id);
+    if (!room) return;
+    const player = room.players.find((p) => p.id === socket.id);
+    if (!player) return;
+    io.to(room.id).emit("chat:message", socket.id, player.username, cleanMsg);
+  });
+
+  // Chat: lobby message
+  socket.on("lobby:chat", (message: string) => {
+    if (!rateLimiter.check(`lobby:${socket.id}`, RATE_LIMITS.guess.max, RATE_LIMITS.guess.windowMs)) {
+      return;
+    }
+    const cleanMsg = sanitizeString(message, 200);
+    if (!cleanMsg) return;
+    const room = store.getRoomByPlayer(socket.id);
+    if (!room) return;
+    const player = room.players.find((p) => p.id === socket.id);
+    if (!player) return;
+    io.to(room.id).emit("lobby:chat", socket.id, player.username, cleanMsg);
+  });
+
+  // Card game: play a card
+  socket.on("cards:play", (card, chosenSuit) => {
+    const room = store.getRoomByPlayer(socket.id);
+    if (!room) return;
+    gameManager.handlePlayCard(room.id, socket.id, card, chosenSuit);
+  });
+
+  // Card game: draw a card
+  socket.on("cards:draw", () => {
+    const room = store.getRoomByPlayer(socket.id);
+    if (!room) return;
+    gameManager.handleDrawCard(room.id, socket.id);
+  });
+
+  // Card game: pass turn
+  socket.on("cards:pass", () => {
+    const room = store.getRoomByPlayer(socket.id);
+    if (!room) return;
+    gameManager.handlePass(room.id, socket.id);
+  });
+
+  // Social: set online status
+  socket.on("social:set-online", (userId: string) => {
+    if (typeof userId === "string" && userId.length > 0) {
+      onlineTracker.setOnline(socket.id, userId);
+    }
+  });
+
+  // Social: invite friend to game
+  socket.on("social:invite", (friendId: string, roomId: string, gameType: GameType) => {
+    if (!friendId || !roomId) return;
+    const friendSockets = onlineTracker.getSocketsForUser(friendId);
+    const player = store.getPlayer(socket.id);
+    if (!player) return;
+
+    for (const friendSocketId of friendSockets) {
+      io.to(friendSocketId).emit("social:invite-received", {
+        fromUser: { id: player.userId || "", display_name: player.username, username: player.username } as any,
+        roomId,
+        gameType,
+      });
+    }
+  });
+
   // Disconnect
   socket.on("disconnect", () => {
+    onlineTracker.setOffline(socket.id);
     const { roomId, username } = gameManager.handlePlayerDisconnect(socket.id);
     if (roomId) {
       console.log(`${username} (${socket.id}) disconnected from room ${roomId}`);

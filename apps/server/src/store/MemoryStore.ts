@@ -1,4 +1,4 @@
-import { Player, Room, Stroke } from "shared";
+import { Player, Room, Stroke, GameType } from "shared";
 
 export interface RoomState extends Room {
   wordOptions: string[];
@@ -20,7 +20,15 @@ class MemoryStore {
   private rooms: Map<string, RoomState> = new Map();
   private playerToRoom: Map<string, string> = new Map();
 
-  createRoom(roomId: string, hostId: string, username: string, userId?: string): RoomState {
+  getActiveRoomCount(): number {
+    let count = 0;
+    for (const room of this.rooms.values()) {
+      if (room.status !== "finished") count++;
+    }
+    return count;
+  }
+
+  createRoom(roomId: string, hostId: string, username: string, gameType: GameType = "draw-and-guess", userId?: string): RoomState {
     const host: Player = {
       id: hostId,
       userId,
@@ -34,6 +42,7 @@ class MemoryStore {
       host: hostId,
       players: [host],
       status: "lobby",
+      gameType,
       currentDrawer: null,
       secretWord: null,
       round: 0,

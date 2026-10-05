@@ -30,14 +30,25 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If not logged in and trying to access the game, redirect to login
-  if (!user && request.nextUrl.pathname === "/") {
+  // Auth callback routes should pass through without redirect
+  if (request.nextUrl.pathname.startsWith("/auth/")) {
+    return supabaseResponse;
+  }
+
+  // Protected routes - redirect to login if not authenticated
+  const isProtected =
+    request.nextUrl.pathname === "/" ||
+    ["/profile", "/leaderboard", "/friends", "/settings", "/admin"].some(
+      (route) => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/")
+    );
+
+  if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // If logged in and on login page, redirect to game
+  // If logged in and on login page, redirect to home
   if (user && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
@@ -48,5 +59,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login"],
+  matcher: ["/", "/login", "/profile", "/profile/:path*", "/leaderboard", "/friends", "/settings", "/admin", "/auth/:path*"],
 };

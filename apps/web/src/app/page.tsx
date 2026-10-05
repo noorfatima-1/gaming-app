@@ -7,13 +7,17 @@ import { useGameEvents } from "../hooks/useGameEvents";
 import HomeScreen from "../components/HomeScreen";
 import LobbyScreen from "../components/LobbyScreen";
 import GameScreen from "../components/GameScreen";
+import CardGameScreen from "../components/cards/CardGameScreen";
 import ResultsScreen from "../components/ResultsScreen";
 import ToastContainer from "../components/Toast";
 import ConnectionStatus from "../components/ConnectionStatus";
+import { useSocialEvents } from "../hooks/useSocialEvents";
 
 export default function Home() {
   useGameEvents();
+  useSocialEvents();
   const screen = useGameStore((s) => s.screen);
+  const room = useGameStore((s) => s.room);
   const setUsername = useGameStore((s) => s.setUsername);
   const setUserId = useGameStore((s) => s.setUserId);
   const [ready, setReady] = useState(false);
@@ -45,7 +49,7 @@ export default function Home() {
         {screen === "lobby" ? (
           <LobbyScreen />
         ) : screen === "game" ? (
-          <GameScreen />
+          room?.gameType === "crazy-eights" ? <CardGameScreen /> : <GameScreen />
         ) : screen === "results" ? (
           <ResultsScreen />
         ) : (
